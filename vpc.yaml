@@ -1,0 +1,101 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Metadata:
+  License: Apache-2.0
+Description: This stack deploys a VPC with a 2 subnets in different AZs.
+Parameters:
+  CIDR:
+    Type: String
+    Default: "10.0.0.0/16"
+    Description: The CIDR block for the VPC.
+  SubnetACidr:
+    Type: String
+    Default: "10.0.0.0/17"
+    Description: The CIDR block for subnet in availability zone "A".
+  SubnetBCidr:
+    Type: String
+    Default: "10.0.128.0/17"
+    Description: The CIDR block for subnet in availability zone "B".
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      CidrBlock: !Ref 'CIDR'
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref 'VPC'
+      InternetGatewayId: !Ref 'InternetGateway'
+  #
+  # availability zone "A"
+  #
+  SubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+        - 0
+        - Fn::GetAZs: {Ref: 'AWS::Region'}
+      VpcId: !Ref 'VPC'
+      CidrBlock: !Ref 'SubnetACidr'
+  SubnetARouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref 'VPC'
+  SubnetADefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref SubnetARouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  SubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref SubnetARouteTable
+      SubnetId: !Ref SubnetA
+  #
+  # availability zone "B"
+  #
+  SubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+        - 1
+        - Fn::GetAZs: {Ref: 'AWS::Region'}
+      VpcId: !Ref 'VPC'
+      CidrBlock: !Ref 'SubnetBCidr'
+  SubnetBRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref 'VPC'
+  SubnetBDefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref SubnetBRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  SubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref SubnetBRouteTable
+      SubnetId: !Ref SubnetB
+Outputs:
+  VPC:
+    Description: The ID of deployed VPC.
+    Value: !Ref 'VPC'
+    Export:
+      Name: !Join [':', [!Ref 'AWS::StackName', 'VPC']]
+  SubnetA:
+    Description: The ID of subnet in availability zone "A".
+    Value: !Ref 'SubnetA'
+    Export:
+      Name: !Join [':', [!Ref 'AWS::StackName', 'SubnetA']]
+  SubnetB:
+    Description: The ID of subnet in availability zone "B".
+    Value: !Ref 'SubnetB'
+    Export:
+      Name: !Join [':', [!Ref 'AWS::StackName', 'SubnetB']]
