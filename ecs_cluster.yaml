@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: A stack deploying ECS cluster backed by Fargate.
+Description: A stack deploying ECS cluster backed by Fargate and load balancer.
 
 Parameters:
   Name:
