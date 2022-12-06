@@ -72,7 +72,7 @@ Parameters:
 * `LatestAmiId`: AMI identifier. By default uses the latest official image
   of Amazon Linux.
 
-## ECS
+## ECS Cluster
 
 A template used to create a ECS cluster backed by AWS Fargate. It also
 creates Internet-facing load balancer. Depends on [VPC](#VPC) template.
@@ -102,3 +102,37 @@ Exports (replace `ECS_CLUSTER_STACK_NAME` with name of your stack):
 * `VPCSubnetB`: Identifier of VPC subnet for availability zone "B".
 * `LoadBalancerListener`: ARN of load balancer listener.
 * `FargateSecurityGroup`: identifier of Fargate container security group.
+
+## ECS service
+
+A template used to create a ECS service. Depends on [ECS Cluster](#ECS-Cluster)
+template.
+
+```.bash
+aws cloudformation deploy \
+  --stack-name ECS_SERVICE_STACK_NAME \
+  --template-file ./ecs_service.yaml \
+  --parameter-overrides "Name=helloworld" "EcsClusterStackName=ECS_CLUSTER_STACK_NAME"
+```
+
+Parameters:
+
+* `Name`: (required) A name of service.
+* `Image`: Docker image to deploy. If not specified, a default one will deploy
+  "hello world" web application.
+* `ContainerPort`: A port on which application listens inside the container.
+  Default is `5000` which is used by "hello world" application default Docker
+  image.
+* `ContainerCpu`: Amount of CPU shares for the container (1024 shares = 1 CPU).
+  Must be a value defined by Fargate configurations. Default is `256`.
+* `ContainerMemory`: Amount of memory for the container in megabytes.
+  Must be a value defined by Fargate configurations. Default is `512`.
+* `DesiredCount`: Amount of service replicas. Default is `1`.
+* `Role`: IAM role for the service. Default is no role.
+* `ServiceUrlPath`: An URL path that will trigger routing of traffic to the
+  service. If specified as '*', then load balancer will redirect all traffic.
+  Default is `*`.
+* `Priority`: The priority for the routing rule added to the load balancer.
+  Default is `1`.
+* `EcsClusterStackNam`: (required) A name of stack created by using a
+  [ECS Cluster](#ECS-Cluster) template.
