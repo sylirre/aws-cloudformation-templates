@@ -1,0 +1,13 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Metadata:
+  License: Apache-2.0
+Description: This stack creates a ECR repository.
+Parameters:
+  Name:
+    Description: A name of ECR repository to create.
+    Type: String
+Resources:
+  ECR:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Ref Name
