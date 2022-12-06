@@ -1,7 +1,7 @@
 # AWS CloudFormation templates
 
 The set of templates used by [AWS CloudFormation](https://aws.amazon.com/cloudformation/)
-to provision cloud resources.
+to provision cloud resources (EC2 instance and ECS cluster with services).
 
 ## ECR repository
 
@@ -12,7 +12,7 @@ access).
 aws cloudformation deploy \
   --stack-name ECR_STACK_NAME \
   --template-file ./ecr.yaml \
-  --parameter-overrides "Name=<reponame>"
+  --parameter-overrides "Name=repository"
 ```
 
 Parameters:
@@ -71,3 +71,30 @@ Parameters:
   By default all IP addresses can access the SSH port of instance.
 * `LatestAmiId`: AMI identifier. By default uses the latest official image
   of Amazon Linux.
+
+## ECS
+
+A template used to create a ECS cluster backed by AWS Fargate. It also
+creates Internet-facing load balancer. Depends on [VPC](#VPC) template.
+
+```.bash
+aws cloudformation deploy \
+  --stack-name ECS_CLUSTER_STACK_NAME \
+  --template-file ./ecs_cluster.yaml \
+  --capabilities CAPABILITY_IAM \
+  --parameter-overrides "Name=CLUSTER_NAME" "VpcStackName=VPC_STACK_NAME"
+```
+
+Parameters:
+
+* `Name`: (required) A name of ECS cluster.
+* `VpcStackName`: (required) A name of stack created by using a [VPC](#VPC)
+  template.
+
+Exports (replace `ECS_CLUSTER_STACK_NAME` with name of your stack):
+
+* `LoadBalancerURL`: A host of load balancer.
+* `ECSRole`: ARN of ECS IAM role.
+* `ECSTaskExecutionRole`: ARN of task execution IAM role.
+* `LoadBalancerListener`: ARN of load balancer listener.
+* `FargateSecurityGroup`: identifier of Fargate container security group.
