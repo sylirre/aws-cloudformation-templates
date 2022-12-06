@@ -1,7 +1,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Description: This stack creates a EC2 instance.
 Metadata:
   License: Apache-2.0
-Description: This stack creates a EC2 instance.
+
 Parameters:
   InstanceType:
     Description: EC2 instance type.
@@ -20,11 +21,9 @@ Parameters:
   VpcStackName:
     Description: A name of stack used to create a VPC.
     Type: String
-    #Default: vpc-deployment
   KeyName:
     Description: Name of an existing EC2 key pair.
     Type: AWS::EC2::KeyPair::KeyName
-    #Default: testkey
     ConstraintDescription: must be the name of an existing EC2 key pair.
   AllowSshFrom:
     Description: The IP address range allowed to access instance over SSH.
@@ -37,6 +36,7 @@ Parameters:
   LatestAmiId:
     Type:  'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
     Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+
 Resources:
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -67,12 +67,6 @@ Resources:
               !Join [':', [!Ref 'VpcStackName', 'SubnetA']]
       KeyName: !Ref 'KeyName'
       ImageId: !Ref 'LatestAmiId'
-      #UserData:
-      #  Fn::Base64:
-      #    !Sub |
-      #      #!/bin/bash
-      #      useradd -U -m testuser
-      #      echo testuserpass | passwd --stdin testuser
 
 Outputs:
   InstanceId:

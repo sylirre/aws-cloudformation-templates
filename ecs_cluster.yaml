@@ -1,13 +1,15 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: A stack deploying ECS cluster backed by Fargate and load balancer.
+Metadata:
+  License: Apache-2.0
 
 Parameters:
   Name:
+    Type: String
     Description: A name of ECS cluster.
-    Type: String
   VpcStackName:
-    Description: A name of stack used to create a VPC.
     Type: String
+    Description: A name of stack used to create a VPC.
 
 Resources:
   #
@@ -60,7 +62,6 @@ Resources:
       LoadBalancerArn: !Ref 'LoadBalancer'
       Port: 80
       Protocol: HTTP
-
 
   #
   # ECS Cluster

@@ -1,20 +1,22 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Description: This stack deploys a VPC with a 2 subnets in different AZs.
 Metadata:
   License: Apache-2.0
-Description: This stack deploys a VPC with a 2 subnets in different AZs.
+
 Parameters:
   CIDR:
     Type: String
-    Default: "10.0.0.0/16"
     Description: The CIDR block for the VPC.
+    Default: "10.0.0.0/16"
   SubnetACidr:
     Type: String
-    Default: "10.0.0.0/17"
     Description: The CIDR block for subnet in availability zone "A".
+    Default: "10.0.0.0/17"
   SubnetBCidr:
     Type: String
-    Default: "10.0.128.0/17"
     Description: The CIDR block for subnet in availability zone "B".
+    Default: "10.0.128.0/17"
+
 Resources:
   VPC:
     Type: AWS::EC2::VPC
@@ -29,6 +31,7 @@ Resources:
     Properties:
       VpcId: !Ref 'VPC'
       InternetGatewayId: !Ref 'InternetGateway'
+
   #
   # availability zone "A"
   #
@@ -56,6 +59,7 @@ Resources:
     Properties:
       RouteTableId: !Ref SubnetARouteTable
       SubnetId: !Ref SubnetA
+
   #
   # availability zone "B"
   #
@@ -83,6 +87,7 @@ Resources:
     Properties:
       RouteTableId: !Ref SubnetBRouteTable
       SubnetId: !Ref SubnetB
+
 Outputs:
   VPC:
     Description: The ID of deployed VPC.
