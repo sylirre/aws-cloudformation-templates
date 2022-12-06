@@ -44,3 +44,31 @@ Exports (replace `VPC_STACK_NAME` with name of your stack):
 * `VPC_STACK_NAME:VPC`: the identifier of created VPC.
 * `VPC_STACK_NAME:SubnetA`: the identifier of subnet in availability zone "A".
 * `VPC_STACK_NAME:SubnetB`: the identifier of subnet in availability zone "B".
+
+## EC2
+
+A template used to create EC2 instance. Depends on the [VPC](#VPC) template.
+The instance will be attached to subnet in availability zone "A" and will
+have public IP.
+
+This template is very basic and doesn't let you configure most of EC2 instance
+properties.
+
+```.bash
+aws cloudformation deploy \
+  --stack-name EC2_STACK_NAME \
+  --template-file ./vpc.yaml \
+  --parameter-overrides "VpcStackName=VPC_STACK_NAME" \
+  --parameter-overrides "KeyName=EC2_KEY_PAIR"
+```
+
+Parameters:
+
+* `InstanceType`: EC2 instance type. Default is `t3.micro`.
+* `VpcStackName`: (required) A name of stack created by using a [VPC](#VPC)
+  template.
+* `KeyName`: (required) A name of SSH key pair.
+* `AllowSshFrom`: A CIDR block of IP addresses allowed to access SSH port.
+  By default all IP addresses can access the SSH port of instance.
+* `LatestAmiId`: AMI identifier. By default uses the latest official image
+  of Amazon Linux.
