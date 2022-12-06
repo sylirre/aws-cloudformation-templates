@@ -1,0 +1,131 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploy a service on ECS cluster backed by Fargate.
+
+Parameters:
+  Name:
+    Type: String
+    Description: A name for the ECS service.
+  Image:
+    Type: String
+    Description: The Docker image to deploy.
+    Default: "docker.io/digitalocean/flask-helloworld:latest"
+  ContainerPort:
+    Type: Number
+    Description: On what port your application listens inside container.
+    Default: 5000
+  ContainerCpu:
+    Type: Number
+    Description: Amount of CPU shares for the container (1024 shares = 1 CPU).
+    Default: 256
+  ContainerMemory:
+    Type: Number
+    Description: Amount of memory for the container in megabytes.
+    Default: 512
+  DesiredCount:
+    Type: Number
+    Description: Amount of service replicas to spawn.
+    Default: 1
+  Role:
+    Type: String
+    Description: IAM role for the service.
+    Default: ""
+  ServiceUrlPath:
+    Type: String
+    Description: An URL path that will trigger routing of traffic to the
+                 service. If specified as '*', then load balancer will
+                 redirect all traffic.
+    Default: "*"
+  Priority:
+    Type: Number
+    Description: The priority for the routing rule added to the load balancer.
+    Default: 1
+  EcsClusterStackName:
+    Type: String
+    Description: A name of stack used to create a VPC.
+
+Conditions:
+  HasCustomRole: !Not [ !Equals [!Ref 'Role', ''] ]
+
+Resources:
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Ref 'Name'
+      Cpu: !Ref 'ContainerCpu'
+      Memory: !Ref 'ContainerMemory'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn:
+        Fn::ImportValue:
+          !Join [':', [!Ref 'EcsClusterStackName', 'ECSTaskExecutionRole']]
+      TaskRoleArn:
+        Fn::If:
+          - 'HasCustomRole'
+          - !Ref 'Role'
+          - !Ref "AWS::NoValue"
+      ContainerDefinitions:
+        - Name: !Ref 'Name'
+          Cpu: !Ref 'ContainerCpu'
+          Memory: !Ref 'ContainerMemory'
+          Image: !Ref 'Image'
+          PortMappings:
+            - ContainerPort: !Ref 'ContainerPort'
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 6
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      TargetType: ip
+      Name: !Ref 'Name'
+      Port: !Ref 'ContainerPort'
+      Protocol: HTTP
+      UnhealthyThresholdCount: 2
+      VpcId:
+        Fn::ImportValue:
+          !Join [':', [!Ref 'EcsClusterStackName', 'VPC']]
+  LoadBalancerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions:
+        - TargetGroupArn: !Ref 'TargetGroup'
+          Type: 'forward'
+      Conditions:
+        - Field: path-pattern
+          Values: [!Ref 'ServiceUrlPath']
+      ListenerArn:
+        Fn::ImportValue:
+          !Join [':', [!Ref 'EcsClusterStackName', 'LoadBalancerListener']]
+      Priority: !Ref 'Priority'
+  Service:
+    Type: AWS::ECS::Service
+    DependsOn: LoadBalancerRule
+    Properties:
+      ServiceName: !Ref 'Name'
+      Cluster:
+        Fn::ImportValue:
+          !Join [':', [!Ref 'EcsClusterStackName', 'ClusterName']]
+      LaunchType: FARGATE
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 75
+      DesiredCount: !Ref 'DesiredCount'
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+            - Fn::ImportValue:
+                !Join [':', [!Ref 'EcsClusterStackName', 'FargateSecurityGroup']]
+          Subnets:
+            - Fn::ImportValue:
+                !Join [':', [!Ref 'EcsClusterStackName', 'VPCSubnetA']]
+            - Fn::ImportValue:
+                !Join [':', [!Ref 'EcsClusterStackName', 'VPCSubnetB']]
+      TaskDefinition: !Ref 'TaskDefinition'
+      LoadBalancers:
+        - ContainerName: !Ref 'Name'
+          ContainerPort: !Ref 'ContainerPort'
+          TargetGroupArn: !Ref 'TargetGroup'
