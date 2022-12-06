@@ -144,28 +144,54 @@ Resources:
               Resource: '*'
 
 Outputs:
+  ClusterName:
+    Description: The name of ECS cluster.
+    Value: !Ref 'Name'
+    Export:
+      Name: !Join [':', [!Ref 'AWS::StackName', 'ClusterName']]
   LoadBalancerURL:
     Description: The URL of load balancer.
     Value: !Join ['', ['http://', !GetAtt 'LoadBalancer.DNSName']]
     Export:
-      Name: !Join [ ':', [ !Ref 'AWS::StackName', 'LoadBalancerURL' ] ]
+      Name: !Join [':', [!Ref 'AWS::StackName', 'LoadBalancerURL']]
   ECSRole:
     Description: ECS role ARN.
     Value: !GetAtt 'ECSRole.Arn'
     Export:
-      Name: !Join [ ':', [ !Ref 'AWS::StackName', 'ECSRole' ] ]
+      Name: !Join [':', [!Ref 'AWS::StackName', 'ECSRole']]
   ECSTaskExecutionRole:
     Description: ECS task execution role ARN.
     Value: !GetAtt 'ECSTaskExecutionRole.Arn'
     Export:
-      Name: !Join [ ':', [ !Ref 'AWS::StackName', 'ECSTaskExecutionRole' ] ]
+      Name: !Join [':', [!Ref 'AWS::StackName', 'ECSTaskExecutionRole']]
+  VPC:
+    Description: VPC used for cluster.
+    Value:
+      Fn::ImportValue:
+        !Join [':', [!Ref 'VpcStackName', 'VPC']]
+    Export:
+      Name: !Join [':', [!Ref 'AWS::StackName', 'VPC']]
+  VPCSubnetA:
+    Description: VPC subnet for availability zone "A".
+    Value:
+      Fn::ImportValue:
+        !Join [':', [!Ref 'VpcStackName', 'SubnetA']]
+    Export:
+      Name: !Join [':', [!Ref 'AWS::StackName', 'VPCSubnetA']]
+  VPCSubnetB:
+    Description: VPC subnet for availability zone "B".
+    Value:
+      Fn::ImportValue:
+        !Join [':', [!Ref 'VpcStackName', 'SubnetB']]
+    Export:
+      Name: !Join [':', [!Ref 'AWS::StackName', 'VPCSubnetB']]
   LoadBalancerListener:
     Description: Load balancer listener ARN.
     Value: !Ref 'LoadBalancerListener'
     Export:
-      Name: !Join [ ':', [ !Ref 'AWS::StackName', 'LoadBalancerListener' ] ]
+      Name: !Join [':', [!Ref 'AWS::StackName', 'LoadBalancerListener']]
   FargateSecurityGroup:
     Description: Security group that enables access to containers.
     Value: !Ref 'FargateSecurityGroup'
     Export:
-      Name: !Join [ ':', [ !Ref 'AWS::StackName', 'FargateSecurityGroup' ] ]
+      Name: !Join [':', [!Ref 'AWS::StackName', 'FargateSecurityGroup']]

@@ -93,8 +93,12 @@ Parameters:
 
 Exports (replace `ECS_CLUSTER_STACK_NAME` with name of your stack):
 
+* `ClusterName`: A name of cluster.
 * `LoadBalancerURL`: A host of load balancer.
 * `ECSRole`: ARN of ECS IAM role.
 * `ECSTaskExecutionRole`: ARN of task execution IAM role.
+* `VPC`: Identifier of VPC used for cluster.
+* `VPCSubnetA`: Identifier of VPC subnet for availability zone "A".
+* `VPCSubnetB`: Identifier of VPC subnet for availability zone "B".
 * `LoadBalancerListener`: ARN of load balancer listener.
 * `FargateSecurityGroup`: identifier of Fargate container security group.
