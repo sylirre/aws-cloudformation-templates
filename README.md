@@ -58,8 +58,7 @@ properties.
 aws cloudformation deploy \
   --stack-name EC2_STACK_NAME \
   --template-file ./vpc.yaml \
-  --parameter-overrides "VpcStackName=VPC_STACK_NAME" \
-  --parameter-overrides "KeyName=EC2_KEY_PAIR"
+  --parameter-overrides "VpcStackName=VPC_STACK_NAME" "KeyName=EC2_KEY_PAIR"
 ```
 
 Parameters:
