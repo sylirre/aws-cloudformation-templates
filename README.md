@@ -10,7 +10,7 @@ access).
 
 ```.bash
 aws cloudformation deploy \
-  --stack-name my-ecr-stack \
+  --stack-name ECR_STACK_NAME \
   --template-file ./ecr.yaml \
   --parameter-overrides "Name=<reponame>"
 ```
@@ -26,7 +26,7 @@ zone. Both subnets have the Internet Gateway attached.
 
 ```.bash
 aws cloudformation deploy \
-  --stack-name my-vpc-stack \
+  --stack-name VPC_STACK_NAME \
   --template-file ./vpc.yaml
 ```
 
@@ -38,3 +38,9 @@ Parameters:
   specified, then `10.0.0.0/17` will be used.
 * `SubnetBCidr`: The CIDR block for subnet in availability zone "B". If not
   specified, then `10.0.128.0/17` will be used.
+
+Exports (replace `VPC_STACK_NAME` with name of your stack):
+
+* `VPC_STACK_NAME:VPC`: the identifier of created VPC.
+* `VPC_STACK_NAME:SubnetA`: the identifier of subnet in availability zone "A".
+* `VPC_STACK_NAME:SubnetB`: the identifier of subnet in availability zone "B".
