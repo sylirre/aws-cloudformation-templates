@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploy a MySQL RDS instance.
+Metadata: 
+  License: Apache-2.0
+
+Parameters:
+  Name:
+    Type: String
+    Description: The name of database.
+    Default: DefaultDatabase
+    MinLength: '1'
+    MaxLength: '64'
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: must begin with a letter and contain only alphanumeric
+      characters.
+  Engine:
+    Type: String
+    Description: The database engine.
+    Default: mysql
+    AllowedValues: [mysql, mariadb, postgres]
+    ConstraintDescription: must select a valid database engine.
+  AdminUserName:
+    Type: String
+    Description: The name of admin user of database.
+    NoEcho: 'true'
+    MinLength: '1'
+    MaxLength: '16'
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: must begin with a letter and contain only alphanumeric
+      characters.
+  AdminUserPassword:
+    Type: String
+    Description: The password of admin user.
+    NoEcho: 'true'
+    MinLength: '1'
+    MaxLength: '41'
+    AllowedPattern: '[a-zA-Z0-9]+'
+    ConstraintDescription: must contain only alphanumeric characters.
+  AllocatedStorage:
+    Type: Number
+    Description: Amount of disk space to allocate for database in gigabytes.
+    Default: '5'
+    MinValue: '5'
+    MaxValue: '1024'
+    ConstraintDescription: must be between 5 and 1024 Gb.
+  InstanceType:
+    Type: String
+    Description: The type of database instance.
+    Default: db.t3.small
+    AllowedValues: [db.t3.micro, db.t3.small, db.t3.medium, db.t3.large, db.t3.xlarge, db.t3.2xlarge,
+      db.r5.large, db.r5.xlarge, db.r5.2xlarge, db.r5.4xlarge, db.r5.8xlarge,
+      db.r5b.large, db.r5b.xlarge, db.r5b.2xlarge, db.r5b.4xlarge, db.r5b.8xlarge,
+      db.r5d.large, db.r5d.xlarge, db.r5d.2xlarge, db.r5d.4xlarge, db.r5d.8xlarge,
+      db.r6i.large, db.r6i.xlarge, db.r6i.2xlarge, db.r6i.4xlarge, db.r6i.8xlarge,
+      db.m5.large, db.m5.xlarge, db.m5.2xlarge, db.m5.4xlarge, db.m5.8xlarge,
+      db.m5d.large, db.m5d.xlarge, db.m5d.2xlarge, db.m5d.4xlarge, db.m5d.8xlarge,
+      db.m6i.large, db.m6i.xlarge, db.m6i.2xlarge, db.m6i.4xlarge, db.m6i.8xlarge]
+    ConstraintDescription: must select a valid database instance type.
+  AllowedSecurityGroup:
+    Type: String
+    Description: The source security group resources of which need access to the database.
+    Default: default
+    AllowedPattern: '[a-zA-Z0-9\-]+'
+    ConstraintDescription: must be a valid security group name.
+  MultiAZ:
+    Type: String
+    Description: Whether to setup RDS instance as multi-AZ.
+    Default: 'false'
+    AllowedValues: ['true', 'false']
+    ConstraintDescription: must be true or false.
+
+Resources:
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Grant access to RDS.
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '3306'
+        ToPort: '3306'
+        SourceSecurityGroupName: !Ref 'AllowedSecurityGroup'
+
+  Database:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBName: !Ref 'Name'
+      AllocatedStorage: !Ref 'AllocatedStorage'
+      DBInstanceClass: !Ref 'InstanceType'
+      Engine: !Ref 'Engine'
+      MasterUsername: !Ref 'AdminUserName'
+      MasterUserPassword: !Ref 'AdminUserPassword'
+      MultiAZ: !Ref 'MultiAZ'
+      VPCSecurityGroups: [!GetAtt [SecurityGroup, GroupId]]
+    DeletionPolicy: Snapshot
+
+Outputs:
+  MasterJDBCConnectionString:
+    Description: JDBC connection string for database.
+    Value: !Join ['', ['jdbc:mysql://', !GetAtt [Database, Endpoint.Address], ':',
+        !GetAtt [Database, Endpoint.Port], /, !Ref 'Name']]
