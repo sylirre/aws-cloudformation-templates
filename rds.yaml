@@ -93,7 +93,13 @@ Resources:
     DeletionPolicy: Snapshot
 
 Outputs:
-  MasterJDBCConnectionString:
-    Description: JDBC connection string for database.
-    Value: !Join ['', ['jdbc:mysql://', !GetAtt [Database, Endpoint.Address], ':',
-        !GetAtt [Database, Endpoint.Port], /, !Ref 'Name']]
+  EndpointAddress:
+    Description: Database connection endpoint address.
+    Value: !GetAtt [Database, Endpoint.Address]
+    Export:
+      Name: !Join [':', [!Ref 'AWS::StackName', 'EndpointAddress']]
+  EndpointPort:
+    Description: Database connection endpoint port.
+    Value: !GetAtt [Database, Endpoint.Port]
+    Export:
+      Name: !Join [':', [!Ref 'AWS::StackName', 'EndpointPort']]
