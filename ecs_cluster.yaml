@@ -150,11 +150,11 @@ Outputs:
     Value: !Ref 'Name'
     Export:
       Name: !Join [':', [!Ref 'AWS::StackName', 'ClusterName']]
-  LoadBalancerURL:
-    Description: The URL of load balancer.
-    Value: !Join ['', ['http://', !GetAtt 'LoadBalancer.DNSName']]
+  LoadBalancerHost:
+    Description: The DNS host of load balancer.
+    Value: !GetAtt 'LoadBalancer.DNSName'
     Export:
-      Name: !Join [':', [!Ref 'AWS::StackName', 'LoadBalancerURL']]
+      Name: !Join [':', [!Ref 'AWS::StackName', 'LoadBalancerHost']]
   ECSRole:
     Description: ECS role ARN.
     Value: !GetAtt 'ECSRole.Arn'

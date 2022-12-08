@@ -94,7 +94,7 @@ Parameters:
 Exports (replace `ECS_CLUSTER_STACK_NAME` with name of your stack):
 
 * `ClusterName`: A name of cluster.
-* `LoadBalancerURL`: A host of load balancer.
+* `LoadBalancerHost`: A host of load balancer.
 * `ECSRole`: ARN of ECS IAM role.
 * `ECSTaskExecutionRole`: ARN of task execution IAM role.
 * `VPC`: Identifier of VPC used for cluster.
