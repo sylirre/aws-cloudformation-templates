@@ -136,3 +136,29 @@ Parameters:
   Default is `1`.
 * `EcsClusterStackNam`: (required) A name of stack created by using a
   [ECS Cluster](#ECS-Cluster) template.
+
+## RDS
+
+A template used to create RDS database instance. Supported engine types are:
+mysql, mariadb, postgres.
+
+```.bash
+aws cloudformation deploy \
+  --stack-name RDS_STACK_NAME \
+  --template-file ./rds.yaml \
+  --parameter-overrides 'Engine=DB_ENGINE' 'AdminUserName=USERNAME' 'AdminUserPassword=PASSWORD'
+```
+
+Parameters:
+
+* `Name`: (required) Database name.
+* `Engine`: The engine of RDS instance. Default is `mysql`.
+* `AdminUserName`: (required) The admin user name.
+* `AdminUserPass`: (required) The admin user password.
+* `AllocatedStorage`: How much storage RDS instance should have in gigabytes.
+   Default is `5`.
+* `InstanceType`: The type of RDS instance. Default is `db.t3.small`.
+* `AllowedSecurityGroup`: Resources of which security group should have access
+   to the database. Default is `default`.
+* `MultiAZ`: Whether the RDS instance should be multi-AZ (true/false). Default
+  is `false`.
