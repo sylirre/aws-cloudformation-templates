@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Deploy a MySQL RDS instance.
+Description: Deploy a MySQL/MariaDB/PostgreSQL RDS instance.
 Metadata: 
   License: Apache-2.0
 
