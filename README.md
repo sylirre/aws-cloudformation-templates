@@ -146,7 +146,7 @@ mysql, mariadb, postgres.
 aws cloudformation deploy \
   --stack-name RDS_STACK_NAME \
   --template-file ./rds.yaml \
-  --parameter-overrides 'Name=dbname' 'AdminUserName=USERNAME' 'AdminUserPassword=PASSWORD'
+  --parameter-overrides "Name=dbname" "AdminUserName=USERNAME" "AdminUserPassword=PASSWORD"
 ```
 
 Parameters:
@@ -167,3 +167,23 @@ Exports (replace `RDS_STACK_NAME` with name of your stack):
 
 * `RDS_STACK_NAME:EndpointAddress`: database endpoint host.
 * `RDS_STACK_NAME:EndpointPort`: database endpoint port.
+
+## Route53
+
+A template used to create a record in given hosted zone. Supported record
+types are: A, AAAA, CNAME, TXT.
+
+```.bash
+aws cloudformation deploy \
+  --stack-name MY_DNSRECORD_STACK \
+  --template-file ./route53_record.yaml \
+  --parameter-overrides "HostedZoneId=ZONE" "Name=NAME" "Type=TYPE" "Value=VALUE"
+```
+
+Parameters:
+
+* `HostedZoneId`: (required) The hosted zone id where record should be created.
+* `Name`: (required) The name of DNS record.
+* `Type`: (required) The type of DNS record.
+* `TTL`: Time to live for DNS record in seconds. Default is `300`.
+* `Value`: (required) DNS record value.
