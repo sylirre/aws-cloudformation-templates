@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: This stack creates a Route53 record.
+Metadata:
+  License: Apache-2.0
+
+Parameters:
+  HostedZoneId:
+    Type: String
+    Description: The identifier of hosted zone.
+  Name:
+    Type: String
+    Description: The name of record.
+  Type:
+    Type: String
+    Description: The type of DNS record.
+    Default: 'A'
+    AllowedValues: [A, AAAA, CNAME, TXT]
+    ConstraintDescription: 'must be one of supported record types: A, AAAA,
+      CNAME, TXT.'
+  TTL:
+    Type: String
+    Description: The time to live of record.
+    Default: '300'
+  Value:
+    Type: String
+    Description: The value of record.
+
+Conditions:
+  TxtRecord: !Equals [!Ref 'Type', 'TXT']
+  NotTxtRecord: !Not [{Condition: TxtRecord}]
+
+Resources:
+  Record:
+    Type: AWS::Route53::RecordSet
+    Condition: NotTxtRecord
+    Properties:
+      HostedZoneId: !Ref 'HostedZoneId'
+      Name: !Ref 'Name'
+      Type: !Ref 'Type'
+      TTL: !Ref 'TTL'
+      ResourceRecords:
+       - !Ref 'Value'
+
+  TXTRecord:
+    Type: AWS::Route53::RecordSet
+    Condition: TxtRecord
+    Properties:
+      HostedZoneId: !Ref 'HostedZoneId'
+      Name: !Ref 'Name'
+      Type: TXT
+      TTL: !Ref 'TTL'
+      ResourceRecords:
+       - !Sub '"${Value}"'
