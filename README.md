@@ -134,7 +134,7 @@ Parameters:
   Default is `*`.
 * `Priority`: The priority for the routing rule added to the load balancer.
   Default is `1`.
-* `EcsClusterStackNam`: (required) A name of stack created by using a
+* `EcsClusterStackName`: (required) A name of stack created by using a
   [ECS Cluster](#ECS-Cluster) template.
 
 ## RDS
